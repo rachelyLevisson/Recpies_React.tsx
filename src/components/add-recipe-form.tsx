@@ -1,0 +1,279 @@
+
+"use client"
+
+import type React from "react"
+import { useEffect, useState } from "react"
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  IconButton,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+} from "@mui/material"
+import { Close, Add } from "@mui/icons-material"
+import { Category, Ingridents, Recipe } from "../types"
+import axios from "axios"
+
+interface AddRecipeFormProps {
+  recipe?: Recipe | null
+  ingredients?: Ingridents | null
+  onSubmit: (recipe: any) => void
+  onClose: () => void
+}
+
+export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
+  const isEditing = !!recipe
+
+  const [categor, setCategor] = useState<Category[]>([]);
+  const [formData, setFormData] = useState({
+    Name: recipe?.Name || "",
+    Description: recipe?.Description || "",
+    Ingridents: recipe?.Ingridents || [],
+    Instructions: recipe?.Instructions || [],
+    Duration: recipe?.Duration || 30,
+    Difficulty: recipe?.Difficulty || "קל",
+    Img: recipe?.Img || "/placeholder.svg?height=300&width=400",
+    Categoryid: recipe?.Categoryid || 0
+  })
+
+  const [ingridentsData, setIngridentsData] = useState<Ingridents[]>([{
+    Id: ingredients?.Id || 0,
+    Name: ingredients?.Name || "",
+    Count: ingredients?.Count || "",
+    Type: ingredients?.Type || ""
+  }]);
+
+  const [instructions, setInstructions] = useState<string>("");
+
+  useEffect(() => {
+    axios.get<Category[]>("http://localhost:8080/api/category")
+      .then(res => {
+        setCategor(res.data)
+      })
+      .catch(err => console.log(err, "error"));
+  }, [])
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    // Validate form
+    if (
+      !formData.Name ||
+      !formData.Description ||
+      !instructions ||
+      ingridentsData.some((ing) => !ing.Name || !ing.Type)
+    ) {
+      return
+    }
+
+    // Create instructions array properly
+    const instructionsArray = instructions.split('\n')
+      .filter(line => line.trim() !== '')
+      .map(line => ({ Name: line.trim() }));
+
+    // Submit the data
+    if (isEditing && recipe) {
+      onSubmit({
+        ...recipe,
+        ...formData,
+        Ingridents: ingridentsData,
+        Instructions: instructionsArray
+      })
+    } else {
+      onSubmit({
+        ...formData,
+        Ingridents: ingridentsData,
+        Instructions: instructionsArray
+      })
+    }
+  }
+
+  const handleIngredientChange = (index: number, key: string, value: any) => {
+    const newIngredients = [...ingridentsData];
+    newIngredients[index] = { ...newIngredients[index], [key]: value };
+    setIngridentsData(newIngredients);
+  };
+
+  const removeIngredient = (index: number) => {
+    const newIngredients = [...ingridentsData]
+    newIngredients.splice(index, 1)
+    setIngridentsData(newIngredients)
+  }
+
+  const addIngredient = () => {
+    setIngridentsData([...ingridentsData, { Id: 0, Name: "", Count: "", Type: "" }]);
+  };
+
+  // Convert Instructions to string for textarea on component mount
+  useEffect(() => {
+    if (recipe?.Instructions) {
+      const instructionsText = recipe.Instructions
+        .map(instruction => instruction.Name)
+        .join('\n');
+      setInstructions(instructionsText);
+    }
+  }, [recipe]);
+
+  return (
+    <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
+      <DialogTitle>
+        {isEditing ? "עריכת מתכון" : "הוספת מתכון חדש"}
+        <IconButton
+          aria-label="close"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            left: 8,
+            top: 8,
+          }}
+        >
+          <Close />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent dividers>
+        <form onSubmit={handleSubmit} id="recipe-form">
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2, mb: 3 }}>
+            <TextField
+              label="שם המתכון"
+              fullWidth
+              value={formData.Name}
+              onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
+              required
+            />
+            <TextField
+              label="תמונה (URL)"
+              fullWidth
+              value={formData.Img}
+              onChange={(e) => setFormData({ ...formData, Img: e.target.value })}
+            />
+          </Box>
+
+          <TextField
+            label="תיאור קצר"
+            fullWidth
+            value={formData.Description}
+            onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
+            required
+            sx={{ mb: 3 }}
+          />
+
+          <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2, mb: 3 }}>
+            <TextField
+              label="זמן הכנה (דקות)"
+              type="number"
+              fullWidth
+              InputProps={{ inputProps: { min: 1 } }}
+              value={formData.Duration}
+              onChange={(e) => setFormData({ ...formData, Duration: Number.parseInt(e.target.value) || 0 })}
+              required
+            />
+            <FormControl fullWidth required>
+              <InputLabel id="difficulty-label">רמת קושי</InputLabel>
+              <Select
+                labelId="difficulty-label"
+                value={formData.Difficulty}
+                label="רמת קושי"
+                onChange={(e) => setFormData({ ...formData, Difficulty: e.target.value })}
+              >
+                <MenuItem value="קל">קל</MenuItem>
+                <MenuItem value="בינוני">בינוני</MenuItem>
+                <MenuItem value="קשה">קשה</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+
+          <FormControl fullWidth required sx={{ mb: 3 }}>
+            <InputLabel id="category-label">קטגוריה</InputLabel>
+            <Select
+              labelId="category-label"
+              label="קטגוריה"
+              name="CategoryId"
+              value={formData.Categoryid}
+              onChange={(e) => setFormData({ ...formData, Categoryid: Number(e.target.value) })}
+            >
+              {categor?.map((category) => (
+                <MenuItem key={category.Id} value={category.Id}>{category.Name}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <Typography variant="h6" gutterBottom>
+            מרכיבים
+          </Typography>
+          <List sx={{ mb: 3 }}>
+            {ingridentsData.map((ingred, index) => (
+              <ListItem key={index} disableGutters sx={{ px: 0 }}>
+                <ListItemText
+                  primary={
+                    <Box display="flex" gap={2}>
+                      <TextField
+                        type="text"
+                        name="Count"
+                        label="כמות"
+                        variant="outlined"
+                        value={ingred.Count}
+                        onChange={(e) => handleIngredientChange(index, "Count", e.target.value)}
+                      />
+                      <TextField
+                        name="Type"
+                        label="סוג"
+                        variant="outlined"
+                        value={ingred.Type}
+                        onChange={(e) => handleIngredientChange(index, "Type", e.target.value)}
+                        required
+                      />
+                      <TextField
+                        name="Name"
+                        label="שם מוצר"
+                        variant="outlined"
+                        value={ingred.Name}
+                        onChange={(e) => handleIngredientChange(index, "Name", e.target.value)}
+                        required
+                      />
+                      {index > 0 && (
+                        <IconButton onClick={() => removeIngredient(index)}>
+                          <Close />
+                        </IconButton>
+                      )}
+                    </Box>
+                  }
+                />
+              </ListItem>
+            ))}
+          </List>
+          <Button startIcon={<Add />} variant="outlined" size="small" onClick={addIngredient} sx={{ mb: 3 }}>
+            הוסף מרכיב
+          </Button>
+
+          <TextField
+            label="הוראות הכנה"
+            multiline
+            rows={6}
+            fullWidth
+            value={instructions}
+            onChange={(e) => setInstructions(e.target.value)}
+            placeholder="כל הוראה בשורה חדשה..."
+            required
+            helperText="כתוב כל הוראה בשורה נפרדת"
+          />
+        </form>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={onClose}>ביטול</Button>
+        <Button type="submit" form="recipe-form" variant="contained" color="primary">
+          {isEditing ? "עדכן מתכון" : "הוסף מתכון"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  )
+}
