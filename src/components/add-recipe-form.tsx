@@ -1,29 +1,14 @@
 
 "use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  Button,
-  TextField,
-  Box,
-  IconButton,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Typography,
-  List,
-  ListItem,
-  ListItemText,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton, FormControl, InputLabel, Select, MenuItem, Typography, List, ListItem, ListItemText,
 } from "@mui/material"
 import { Close, Add } from "@mui/icons-material"
 import { Category, Ingridents, Recipe } from "../types"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 interface AddRecipeFormProps {
   recipe?: Recipe | null
@@ -35,6 +20,7 @@ interface AddRecipeFormProps {
 export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
   const isEditing = !!recipe
 
+  const [error, setError] = useState("")
   const [categor, setCategor] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     Name: recipe?.Name || "",
@@ -55,6 +41,8 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
   }]);
 
   const [instructions, setInstructions] = useState<string>("");
+  const navigate = useNavigate()
+
 
   useEffect(() => {
     axios.get<Category[]>("http://localhost:8080/api/category")
@@ -80,21 +68,25 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
     const instructionsArray = instructions.split('\n')
       .filter(line => line.trim() !== '')
       .map(line => ({ Name: line.trim() }));
-
-    // Submit the data
-    if (isEditing && recipe) {
-      onSubmit({
-        ...recipe,
-        ...formData,
-        Ingridents: ingridentsData,
-        Instructions: instructionsArray
-      })
-    } else {
-      onSubmit({
-        ...formData,
-        Ingridents: ingridentsData,
-        Instructions: instructionsArray
-      })
+    try {
+      // Submit the data
+      if (isEditing && recipe) {
+        onSubmit({
+          ...recipe,
+          ...formData,
+          Ingridents: ingridentsData,
+          Instructions: instructionsArray
+        })
+      } else {
+        onSubmit({
+          ...formData,
+          Ingridents: ingridentsData,
+          Instructions: instructionsArray
+        })
+      }
+    }
+    catch (err: any) {
+      setError(err.message)
     }
   }
 
@@ -130,7 +122,11 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
         {isEditing ? "עריכת מתכון" : "הוספת מתכון חדש"}
         <IconButton
           aria-label="close"
-          onClick={onClose}
+          onClick={() => {
+            onClose
+            navigate("/");
+          }
+          }
           sx={{
             position: "absolute",
             left: 8,
@@ -268,8 +264,16 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
           />
         </form>
       </DialogContent>
+      {error && (
+        <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+          {error}
+        </Typography>
+      )}
       <DialogActions>
-        <Button onClick={onClose}>ביטול</Button>
+        <Button onClick={() => {
+          onClose
+          navigate('/')
+        }}>ביטול</Button>
         <Button type="submit" form="recipe-form" variant="contained" color="primary">
           {isEditing ? "עדכן מתכון" : "הוסף מתכון"}
         </Button>

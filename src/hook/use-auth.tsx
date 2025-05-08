@@ -31,18 +31,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const login = async (UserName: string, Password: string) => {
+    var response: any
     try {
-      const response = await axios.post('http://localhost:8080/api/user/login', {
+      response = await axios.post('http://localhost:8080/api/user/login', {
         UserName,
         Password,
       });
       setUser(response.data)
       localStorage.setItem("user", JSON.stringify(response.data))
-
     } catch (error) {
-      console.error('Login failed:', error);
+      throw new Error('שם המשתמש או הסיסמה שגויים');
     }
-
   }
 
   const register = async (user: User) => {
@@ -59,8 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem("user", JSON.stringify(response.data))
     }
     catch (err) {
-      console.error("dont add", err);
-
+      throw new Error('שם המשתמש כבר קיים');
     }
   }
 

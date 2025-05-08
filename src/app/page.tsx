@@ -11,6 +11,7 @@ import RecipeCard from "../components/recipe-card"
 import type { Category, Ingridents, Recipe } from "../types"
 import { useAuth } from "../hook/use-auth.tsx"
 import axios from "axios"
+import { useNavigate } from "react-router-dom"
 
 export default function Home() {
     const { user, isAuthenticated, logout } = useAuth()
@@ -24,7 +25,7 @@ export default function Home() {
     const [activeTab, setActiveTab] = useState(0)
     const [category, setCategory] = useState<Category[]>([])
     const [selectedCategory, setSelectedCategory] = useState(0)
-
+    const navigate = useNavigate();
 
     //All Recpies
     useEffect(() => {
@@ -33,7 +34,7 @@ export default function Home() {
                 setRecipes(res.data)
                 setFilteredRecipes(res.data)
             })
-            .catch((err) => console.log(err, "error"))
+            .catch((err) => { throw new Error(err.message) })
     }, [])
     //get Category
     useEffect(() => {
@@ -42,7 +43,7 @@ export default function Home() {
             .then((res) => {
                 setCategory(res.data)
             })
-            .catch((err) => console.log(err, "error"))
+            .catch((err) => { throw new Error(err.message) })
     }, [])
 
     //Filter
@@ -65,7 +66,10 @@ export default function Home() {
         // Filter by tab
         if (activeTab === 1 && isAuthenticated && user) {
             result = result.filter((recipe) => recipe.UserId === user.Id)
+            navigate("/my-recipes")
         }
+        else
+        navigate("/")
 
         //Filter to Category
         if (selectedCategory) {
@@ -103,7 +107,7 @@ export default function Home() {
             setRecipes([...recipes, savedRecipe])
             setShowAddRecipeForm(false)
         } catch (err) {
-            console.error("Error adding recipe", err)
+            throw new Error("המתכון כבר קיים במאגר....")
         }
     }
 
@@ -123,7 +127,7 @@ export default function Home() {
             setSelectedRecipe(null);
             setShowAddRecipeForm(false);
         } catch (err) {
-            console.error("Error updating recipe", err);
+            throw new Error("אי איפשר לערוך כרגע את המתכון")
         }
     }
 
@@ -133,7 +137,7 @@ export default function Home() {
             const response = await axios.post(`http://localhost:8080/api/recipe/delete/${recipeId}`)
             console.log(response.data)
         } catch (error) {
-            console.error("error! ", error)
+            throw new Error("אי איפשר למחוק כרגע את המתכון")
         }
         setRecipes(recipes.filter((recipe) => recipe.Id !== recipeId))
     }
@@ -172,6 +176,7 @@ export default function Home() {
                                     setSelectedRecipe(null)
                                     // setSelectedIngredient(null)
                                     setShowAddRecipeForm(true)
+                                    navigate("/add-recipe")
                                 }}
                             >
                                 הוסף מתכון
@@ -181,7 +186,10 @@ export default function Home() {
                             </Button>
                         </>
                     ) : (
-                        <Button variant="contained" color="primary" onClick={() => setShowLoginForm(true)}>
+                        <Button variant="contained" color="primary" 
+                         onClick={() => {
+                            // setShowLoginForm(true) 
+                            navigate("/login")}}>
                             התחבר
                         </Button>
                     )}

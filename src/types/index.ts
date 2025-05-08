@@ -28,6 +28,7 @@ export interface Category {
 };
 
   export interface Recipe {
+    User: any;
     Id: number,
     Name: string,
     UserId: number,
@@ -38,6 +39,8 @@ export interface Category {
     Description: string,
     Ingridents: Ingridents[],
     Instructions: Instructions[],
+    createdAt: Date,
+    updatedAt: Date
   }
 
   //  Name, UserId, CategoryId, Img, Duration, Difficulty, Description,

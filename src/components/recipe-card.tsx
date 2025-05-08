@@ -1,30 +1,13 @@
 "use client"
-
 import type React from "react"
 import { useState } from "react"
 import {
-  Card,
-  CardMedia,
-  CardContent,
-  CardActions,
-  Typography,
-  Button,
-  Chip,
-  Box,
-  IconButton,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
+  Card, CardMedia, CardContent, CardActions, Typography, Button, Chip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, List, ListItem, ListItemText, Paper,
 } from "@mui/material"
 import { Edit, Delete, AccessTime, Restaurant, MoreVert } from "@mui/icons-material"
 import { Menu, MenuItem } from "@mui/material"
 import { Recipe } from "../types"
+import { useNavigate } from "react-router-dom"
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -38,20 +21,21 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
+  const navigate = useNavigate();
 
-  // const formatDate = (dateString: string) => {
-  //   const date = new Date(dateString)
-  //   return date.toLocaleDateString("he-IL")
-  // }
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString("he-IL")
+  }
 
   const getDifficultyColor = (difficulty: number) => {
     switch (difficulty) {
       case 1:
-        return "esey"
+        return "קל"
       case 2:
-        return "warning"
+        return "בינוני"
       case 3:
-        return "error"
+        return "קשה"
       default:
         return "default"
     }
@@ -62,6 +46,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
   }
 
   const handleClose = () => {
+    navigate('/')
     setAnchorEl(null)
   }
 
@@ -120,7 +105,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
             צפה במתכון
           </Button>
           <Typography variant="caption" color="text.secondary">
-            {/* @@{formatDate(recipe.createdAt)} */}
+            {formatDate(recipe.createdAt.toString())}
           </Typography>
         </CardActions>
       </Card>
@@ -138,6 +123,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
           onClick={() => {
             onEdit(recipe)
             handleClose()
+            navigate('/edit-recipe')
           }}
         >
           <Edit fontSize="small" sx={{ mr: 1 }} /> עריכה
@@ -166,7 +152,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
             />
             <Chip icon={<AccessTime fontSize="small" />} label={`${recipe.Duration} דקות`} size="small" />
             <Typography variant="body2" color="text.secondary">
-              {/*@@ מאת: {recipe.authorName} */}
+              {/* @@ מאת: {recipe.Author} */}
             </Typography>
           </Box>
 
@@ -188,12 +174,12 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
           </Typography>
           <Paper variant="outlined" sx={{ mb: 3, p: 0 }}>
             <List dense disablePadding>
-           {recipe.Ingridents.map((ingredient, index) => (
+              {recipe.Ingridents.map((ingredient, index) => (
                 <ListItem key={index} divider={index < recipe.Ingridents.length - 1}>
                   <ListItemText primary={ingredient.Count + " " + ingredient.Type + " " + ingredient.Name} />
                 </ListItem>
               ))}
-          </List>
+            </List>
           </Paper>
 
           <Typography variant="h6" gutterBottom>
@@ -204,7 +190,10 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowDetails(false)}>סגור</Button>
+          <Button onClick={() => {
+            setShowDetails(false)
+            navigate
+            }}>סגור</Button>
         </DialogActions>
       </Dialog>
 

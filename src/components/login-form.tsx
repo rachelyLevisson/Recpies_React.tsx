@@ -4,20 +4,12 @@ import type React from "react"
 
 import { useState } from "react"
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  Button,
-  TextField,
-  Box,
-  Tabs,
-  Tab,
-  Typography,
-  IconButton,
+  Dialog, DialogTitle, DialogContent, Button, TextField, Box, Tabs, Tab, Typography, IconButton,
 } from "@mui/material"
 import { Close } from "@mui/icons-material"
 import { useAuth } from '../hook/use-auth'
 import { User } from "../types"
+import { useNavigate } from "react-router-dom"
 
 interface TabPanelProps {
   children?: React.ReactNode
@@ -49,18 +41,24 @@ export default function LoginForm({ onClose }: LoginFormProps) {
   const { login, register } = useAuth()
   const [tabValue, setTabValue] = useState(0)
   const [loginData, setLoginData] = useState({ username: "", password: "" })
-  const [registerData, setRegisterData] = useState<User>({Id: 0,
+  const [registerData, setRegisterData] = useState<User>({
+    Id: 0,
     Email: "", UserName: "", Name: "", Phone: "", Password: "", Tz: "",
   });
   const [error, setError] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
+  const navigate = useNavigate()
 
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue)
+    if(newValue === 1)
+      navigate('/register')
+    else
+      navigate('/login')
     setError("")
   }
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -69,12 +67,18 @@ export default function LoginForm({ onClose }: LoginFormProps) {
       return
     }
 
-    // Mock login - replace with actual API call
-    login(loginData.username, loginData.password)
-    onClose()
+    try {
+      await login(loginData.username, loginData.password)
+      navigate('/')
+      onClose()
+
+    }
+    catch (error: any) {
+      setError(error.message);
+    }
   }
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -87,8 +91,14 @@ export default function LoginForm({ onClose }: LoginFormProps) {
       setError("הסיסמאות אינן תואמות")
       return
     }
-    register(registerData)
-    onClose()
+    try {
+      await register(registerData)
+      navigate('/')
+      onClose()
+    }
+    catch (error: any) {
+      setError(error.message);
+    }
   }
 
   return (
@@ -97,7 +107,10 @@ export default function LoginForm({ onClose }: LoginFormProps) {
         ברוכים הבאים לספר המתכונים
         <IconButton
           aria-label="close"
-          onClick={onClose}
+          onClick={()=>{
+            onClose
+            navigate('/')}
+          }
           sx={{
             position: "absolute",
             left: 8,
