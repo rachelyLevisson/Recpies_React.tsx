@@ -7,6 +7,7 @@ import { RecipesProvider } from "../Context/recipesContext.tsx"
 import { useAuth } from "../hook/use-auth.tsx"
 
 export default function Home() {
+
     const {user}= useAuth();
     return (<>
     <h1>hello</h1>
