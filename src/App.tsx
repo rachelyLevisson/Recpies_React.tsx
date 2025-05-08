@@ -1,13 +1,12 @@
 import './App.css'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom'
 import { AuthProvider } from './hook/use-auth'
 import LoginForm from './components/login-form'
 import Home from './app/page'
 import AddRecipeForm from './components/add-recipe-form'
-import RecipeCard from './components/recipe-card'
 
 function App() {
-
+  const navigate = useNavigate()
   const route = createBrowserRouter([
     {
       path: "/",
@@ -15,24 +14,20 @@ function App() {
     },
     {
       path: "/login",
-      element: <LoginForm onClose={function (): void {
-        throw new Error('Function not implemented.')
-      }} />
+      element: <LoginForm onClose={() => { navigate("/") }} />
     },
     {
       path: "/register",
-      element: <LoginForm onClose={function (): void {
-        throw new Error('Function not implemented.')
-      }} />
+      element: <LoginForm onClose={() => { navigate("/") }} />
     },
     {
       path: "/add-recipe",
-      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => void {}} />
+      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { navigate("/") }} />
 
     },
     {
       path: "/edit-recipe",
-      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => void {}} />
+      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { navigate("/") }} />
     },
     // {
     //   path: "/delete-recipe",
@@ -44,7 +39,7 @@ function App() {
     },
     {
       path: "/recpie",
-      element: <Home/>
+      element: <Home />
     },
     // {
     //   path: "/recpie/:id",
