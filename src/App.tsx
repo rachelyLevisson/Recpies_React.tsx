@@ -4,6 +4,7 @@ import { AuthProvider } from './hook/use-auth'
 import LoginForm from './components/login-form'
 import Home from './app/page'
 import AddRecipeForm from './components/add-recipe-form'
+import { RecipeDetails } from './components/recipeDetails'
 
 function App() {
   const navigate = useNavigate()
@@ -41,19 +42,21 @@ function App() {
       path: "/recpie",
       element: <Home />
     },
-    // {
-    //   path: "/recpie/:id",
-    //   element: <RecipeCard recipe={} isOwner={false} onEdit={() => void {}} onDelete={() => void {}} />
-    // }
+    {
+      path: "/recpie/:id",
+      element: <RecipeDetails />
+    }
   ])
 
 
 
   return (
     <>
+      {/* <ThemeProvider theme={} children={}> */}
       <AuthProvider>
-        <RouterProvider router={route} />
-      </AuthProvider>
+      <RouterProvider router={route} />
+    </AuthProvider>
+      {/* </ThemeProvider> */}
     </>
   )
 }

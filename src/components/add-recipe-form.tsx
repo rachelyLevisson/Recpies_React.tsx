@@ -1,4 +1,3 @@
-
 "use client"
 import type React from "react"
 import { useEffect, useState } from "react"
@@ -6,9 +5,8 @@ import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton, FormControl, InputLabel, Select, MenuItem, Typography, List, ListItem, ListItemText,
 } from "@mui/material"
 import { Close, Add } from "@mui/icons-material"
-import { Category, Ingridents, Recipe } from "../types"
-import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { Ingridents, Recipe } from "../types"
+import { useRecipesContext } from "../Context/recipesContext"
 
 interface AddRecipeFormProps {
   recipe?: Recipe | null
@@ -18,19 +16,20 @@ interface AddRecipeFormProps {
 }
 
 export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
-  const isEditing = !!recipe
 
+  const isEditing = !!recipe
+  
+  const { categories } = useRecipesContext();
   const [error, setError] = useState("")
-  const [categor, setCategor] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     Name: recipe?.Name || "",
     Description: recipe?.Description || "",
-    Ingridents: recipe?.Ingridents || [],
-    Instructions: recipe?.Instructions || [],
+    Ingridents: recipe?.Ingridents.map((ingrident: any) => { ingrident.Name, ingrident.Count, ingrident.Type }) || [],
+    Instructions: recipe?.Instructions.map((instruction: any) => instruction.Name) || [],
     Duration: recipe?.Duration || 30,
     Difficulty: recipe?.Difficulty || "קל",
     Img: recipe?.Img || "/placeholder.svg?height=300&width=400",
-    Categoryid: recipe?.Categoryid || 0
+    Categoryid: recipe?.Categoryid.valueOf() || 0
   })
 
   const [ingridentsData, setIngridentsData] = useState<Ingridents[]>([{
@@ -41,16 +40,10 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
   }]);
 
   const [instructions, setInstructions] = useState<string>("");
-  const navigate = useNavigate()
 
 
-  useEffect(() => {
-    axios.get<Category[]>("http://localhost:8080/api/category")
-      .then(res => {
-        setCategor(res.data)
-      })
-      .catch(err => console.log(err, "error"));
-  }, [])
+
+
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,11 +115,7 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
         {isEditing ? "עריכת מתכון" : "הוספת מתכון חדש"}
         <IconButton
           aria-label="close"
-          onClick={() => {
-            onClose
-            navigate("/");
-          }
-          }
+          onClick={() => { onClose }}
           sx={{
             position: "absolute",
             left: 8,
@@ -197,7 +186,7 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
               value={formData.Categoryid}
               onChange={(e) => setFormData({ ...formData, Categoryid: Number(e.target.value) })}
             >
-              {categor?.map((category) => (
+              {categories?.map((category) => (
                 <MenuItem key={category.Id} value={category.Id}>{category.Name}</MenuItem>
               ))}
             </Select>
@@ -270,10 +259,7 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
         </Typography>
       )}
       <DialogActions>
-        <Button onClick={() => {
-          onClose
-          navigate('/')
-        }}>ביטול</Button>
+        <Button onClick={() => { onClose }}>ביטול</Button>
         <Button type="submit" form="recipe-form" variant="contained" color="primary">
           {isEditing ? "עדכן מתכון" : "הוסף מתכון"}
         </Button>

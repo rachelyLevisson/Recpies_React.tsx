@@ -2,7 +2,7 @@
 import type React from "react"
 import { useState } from "react"
 import {
-  Card, CardMedia, CardContent, CardActions, Typography, Button, Chip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions, List, ListItem, ListItemText, Paper,
+  Card, CardMedia, CardContent, CardActions, Typography, Button, Chip, Box, IconButton, Dialog, DialogTitle, DialogContent, DialogContentText, DialogActions
 } from "@mui/material"
 import { Edit, Delete, AccessTime, Restaurant, MoreVert } from "@mui/icons-material"
 import { Menu, MenuItem } from "@mui/material"
@@ -17,7 +17,6 @@ interface RecipeCardProps {
 }
 
 export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: RecipeCardProps) {
-  const [showDetails, setShowDetails] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -31,11 +30,11 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
   const getDifficultyColor = (difficulty: number) => {
     switch (difficulty) {
       case 1:
-        return "קל"
+        return "success"
       case 2:
-        return "בינוני"
+        return "warning"
       case 3:
-        return "קשה"
+        return "error"
       default:
         return "default"
     }
@@ -101,7 +100,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
           </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
-          <Button size="small" onClick={() => setShowDetails(true)}>
+          <Button size="small" onClick={() => navigate(`/recpie/${recipe.Id}`, {state: {recipe}})}>
             צפה במתכון
           </Button>
           <Typography variant="caption" color="text.secondary">
@@ -138,65 +137,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
         </MenuItem>
       </Menu>
 
-      <Dialog open={showDetails} onClose={() => setShowDetails(false)} maxWidth="md" fullWidth scroll="paper" dir="rtl">
-        <DialogTitle sx={{ pb: 1 }}>{recipe.Name}</DialogTitle>
-        <DialogContent dividers>
-          <DialogContentText sx={{ mb: 2 }}>{recipe.Description}</DialogContentText>
-
-          <Box sx={{ display: "flex", gap: 1, mb: 3 }}>
-            <Chip
-              icon={<Restaurant fontSize="small" />}
-              label={recipe.Difficulty}
-              size="small"
-              color={getDifficultyColor(recipe.Difficulty) as "success" | "warning" | "error" | "default"}
-            />
-            <Chip icon={<AccessTime fontSize="small" />} label={`${recipe.Duration} דקות`} size="small" />
-            <Typography variant="body2" color="text.secondary">
-              {/* @@ מאת: {recipe.Author} */}
-            </Typography>
-          </Box>
-
-          <Box
-            component="img"
-            src={recipe.Img}
-            alt={recipe.Name}
-            sx={{
-              width: "100%",
-              height: 300,
-              objectFit: "cover",
-              borderRadius: 1,
-              mb: 3,
-            }}
-          />
-
-          <Typography variant="h6" gutterBottom>
-            מרכיבים:
-          </Typography>
-          <Paper variant="outlined" sx={{ mb: 3, p: 0 }}>
-            <List dense disablePadding>
-              {recipe.Ingridents.map((ingredient, index) => (
-                <ListItem key={index} divider={index < recipe.Ingridents.length - 1}>
-                  <ListItemText primary={ingredient.Count + " " + ingredient.Type + " " + ingredient.Name} />
-                </ListItem>
-              ))}
-            </List>
-          </Paper>
-
-          <Typography variant="h6" gutterBottom>
-            הוראות הכנה:
-          </Typography>
-          <Typography variant="body1" paragraph sx={{ whiteSpace: "pre-line" }}>
-            {recipe.Instructions.map((instruction, index) => `${index + 1}. ${instruction.Name}\n`).join("")}
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => {
-            setShowDetails(false)
-            navigate
-            }}>סגור</Button>
-        </DialogActions>
-      </Dialog>
-
+      
       <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} dir="rtl">
         <DialogTitle>מחיקת מתכון</DialogTitle>
         <DialogContent>
