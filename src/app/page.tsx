@@ -5,6 +5,7 @@ import { SearchBar } from "../Home/SearchBar.tsx"
 import { RecipeList } from "../Home/RecipeList.tsx"
 import { RecipesProvider } from "../Context/recipesContext.tsx" 
 import { useAuth } from "../hook/use-auth.tsx"
+import { RecipeTabs } from "../Home/RecipeTabs.tsx"
 
 export default function Home() {
 
@@ -15,6 +16,7 @@ export default function Home() {
             <Container maxWidth="lg" sx={{ py: 4, minHeight: "100vh" }} dir="rtl">
                 <Headers />
                 <SearchBar />
+                <RecipeTabs/>
                 <RecipeList />
                 {/* <LoginForm onClose={function (): void {
                     throw new Error("Function not implemented.")

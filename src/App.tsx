@@ -1,5 +1,5 @@
 import './App.css'
-import { createBrowserRouter, RouterProvider, useNavigate } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { AuthProvider } from './hook/use-auth'
 import LoginForm from './components/login-form'
 import Home from './app/page'

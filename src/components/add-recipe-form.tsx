@@ -18,7 +18,7 @@ interface AddRecipeFormProps {
 export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
 
   const isEditing = !!recipe
-  
+
   const { categories } = useRecipesContext();
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
