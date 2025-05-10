@@ -1,120 +1,87 @@
 "use client"
-import type React from "react"
 import { useEffect, useState } from "react"
 import {
   Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, IconButton, FormControl, InputLabel, Select, MenuItem, Typography, List, ListItem, ListItemText,
 } from "@mui/material"
 import { Close, Add } from "@mui/icons-material"
-import { Ingridents, Recipe } from "../types"
+import { Recipe } from "../types"
 import { useRecipesContext } from "../Context/recipesContext"
-import { useNavigate } from "react-router-dom"
+import { useLocation, useNavigate } from "react-router-dom"
 import { useAuth } from "../hook/use-auth"
+import { useForm, useFieldArray } from "react-hook-form"
 
 export default function AddRecipeForm() {
-
   const navigate = useNavigate();
-  const { categories, selectedRecipe, selectRecipe,selectedIngredient, addRecipe, updateRecipe } = useRecipesContext();
-  const isEditing = !!selectRecipe
-console.log("selectRecipe",selectRecipe);
-console.log("selectedRecipe",selectedRecipe);
-
+  const { categories, selectedRecipe, selectRecipe, addRecipe, updateRecipe } = useRecipesContext();
+  const location = useLocation();
+  const recipeNav : Recipe = location.state?.recipe;
+  const isEditing = !!recipeNav;
   const { user } = useAuth();
-  const [error, setError] = useState("")
-  const [formData, setFormData] = useState({
-    Name: selectedRecipe?.Name || "",
-    Description: selectedRecipe?.Description || "",
-    Ingridents: selectedRecipe?.Ingridents.map((ingrident: any) => { ingrident.Name, ingrident.Count, ingrident.Type }) || [],
-    Instructions: selectedRecipe?.Instructions.map((instruction: any) => instruction.Name) || [],
-    Duration: selectedRecipe?.Duration || 30,
-    Difficulty: selectedRecipe?.Difficulty || 1,
-    Img: selectedRecipe?.Img || "/placeholder.svg?height=300&width=400",
-    Categoryid: selectedRecipe?.Categoryid.valueOf() || 0
-  })
+  const [error, setError] = useState("");
+  const { register } = useForm();
 
-  const [ingridentsData, setIngridentsData] = useState<Ingridents[]>([{
-    Id: selectedIngredient?.Id || 0,
-    Name: selectedIngredient?.Name || "",
-    Count: selectedIngredient?.Count || "",
-    Type: selectedIngredient?.Type || ""
-  }]);
 
-  const [instructions, setInstructions] = useState<string>("");
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    // Validate form
-    if (
-      !formData.Name ||
-      !formData.Description ||
-      !instructions ||
-      ingridentsData.some((ing) => !ing.Name || !ing.Type)
-    ) {
-      return
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      Name: recipeNav?.Name || "",
+      Description: recipeNav?.Description || "",
+      Ingridents: recipeNav?.Ingridents || [{ Id: 0, Name: "", Count: "", Type: "" }],
+      Instructions: recipeNav?.Instructions.map((instruction: any) => instruction.Name).join('\n') || "",
+      Duration: recipeNav?.Duration || 30,
+      Difficulty: recipeNav?.Difficulty || 1,
+      Img: recipeNav?.Img || "/placeholder.svg?height=300&width=400",
+      Categoryid: recipeNav?.Categoryid || 0
     }
+  });
 
-    // Create instructions array properly
-    const instructionsArray = instructions.split('\n')
-      .filter(line => line.trim() !== '')
-      .map(line => ({ Name: line.trim() }));
+  const { fields, append, remove } = useFieldArray({
+    control,
+    name: "Ingridents"
+  });
 
-    const newRecpie: Recipe = {
+useEffect(() => {
+    if (isEditing && recipeNav) {
+        recipeNav.Ingridents.forEach(ingredient => {
+            append(ingredient);
+            selectRecipe(recipeNav);
+        });
+    }
+}, [isEditing, recipeNav, append]);
+
+  const onSubmit = (data: any) => {
+    const instructionsArray = data.Instructions.split('\n')
+      .filter((line: any) => line.trim() !== '')
+      .map((line: any) => ({ Name: line.trim() }));
+
+    const newRecipe: Recipe = {
       Id: 0,
-      Name: formData.Name,
+      Name: data.Name,
       UserId: user?.Id || 0,
-      Categoryid: formData.Categoryid,
-      Img: formData.Img,
-      Duration: formData.Duration,
-      Difficulty: formData.Difficulty,
-      Description: formData.Description,
-      Ingridents: [...ingridentsData],
+      Categoryid: data.Categoryid,
+      Img: data.Img,
+      Duration: data.Duration,
+      Difficulty: data.Difficulty,
+      Description: data.Description,
+      Ingridents: data.Ingridents,
       Instructions: instructionsArray.map((name: any, index: number) => ({ Id: index + 1, Name: name })),
       createdAt: new Date(Date.now()),
       updatedAt: new Date(Date.now())
-    }
+    };
 
     try {
-      // Submit the data
       if (isEditing && selectedRecipe) {
-        updateRecipe({
-          // ...selectedRecipe,
-          ...newRecpie
-        })
+        updateRecipe(newRecipe);
       } else {
-        addRecipe(
-          { ...newRecpie },
-          (user?.Id || 0))
+        addRecipe(newRecipe, user?.Id || 0);
       }
+    } catch (err: any) {
+      setError(err.message);
     }
-    catch (err: any) {
-      setError(err.message)
-    }
-  }
-
-  const handleIngredientChange = (index: number, key: string, value: any) => {
-    const newIngredients = [...ingridentsData];
-    newIngredients[index] = { ...newIngredients[index], [key]: value };
-    setIngridentsData(newIngredients);
   };
-
-  const removeIngredient = (index: number) => {
-    const newIngredients = [...ingridentsData]
-    newIngredients.splice(index, 1)
-    setIngridentsData(newIngredients)
-  }
-
-  const addIngredient = () => {
-    setIngridentsData([...ingridentsData, { Id: 0, Name: "", Count: "", Type: "" }]);
-  };
-
-  // Convert Instructions to string for textarea on component mount
-  useEffect(() => {
-    if (selectedRecipe?.Instructions) {
-      const instructionsText = selectedRecipe.Instructions
-        .map(instruction => instruction.Name)
-        .join('\n');
-      setInstructions(instructionsText);
-    }
-  }, [selectedRecipe]);
 
   return (
     <Dialog open={true} maxWidth="md" fullWidth dir="rtl">
@@ -133,29 +100,30 @@ console.log("selectedRecipe",selectedRecipe);
         </IconButton>
       </DialogTitle>
       <DialogContent dividers>
-        <form onSubmit={handleSubmit} id="recipe-form">
+        <form onSubmit={handleSubmit(onSubmit)} id="recipe-form">
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2, mb: 3 }}>
             <TextField
               label="שם המתכון"
               fullWidth
-              value={formData.Name}
-              onChange={(e) => setFormData({ ...formData, Name: e.target.value })}
-              required
+              value={selectedRecipe?.Name}
+              {...register("Name", { required: true })}
+              error={!!errors.Name}
+              helperText={errors.Name ? "שדה חובה" : ""}
             />
             <TextField
               label="תמונה (URL)"
               fullWidth
-              value={formData.Img}
-              onChange={(e) => setFormData({ ...formData, Img: e.target.value })}
+              {...register("Img")}
+              value={selectedRecipe?.Img}
             />
           </Box>
 
           <TextField
             label="תיאור קצר"
             fullWidth
-            value={formData.Description}
-            onChange={(e) => setFormData({ ...formData, Description: e.target.value })}
-            required
+            {...register("Description", { required: true })}
+            error={!!errors.Description}
+            helperText={errors.Description ? "שדה חובה" : ""}
             sx={{ mb: 3 }}
           />
 
@@ -165,21 +133,19 @@ console.log("selectedRecipe",selectedRecipe);
               type="number"
               fullWidth
               InputProps={{ inputProps: { min: 1 } }}
-              value={formData.Duration}
-              onChange={(e) => setFormData({ ...formData, Duration: Number.parseInt(e.target.value) || 0 })}
-              required
+              {...register("Duration", { required: true })}
+              error={!!errors.Duration}
+              helperText={errors.Duration ? "שדה חובה" : ""}
             />
             <FormControl fullWidth required>
               <InputLabel id="difficulty-label">רמת קושי</InputLabel>
               <Select
                 labelId="difficulty-label"
-                value={formData.Difficulty}
-                label="רמת קושי"
-                onChange={(e) => setFormData({ ...formData, Difficulty: Number(e.target.value) })}
+                {...register("Difficulty")}
               >
-                <MenuItem value={1} >קל</MenuItem>
+                <MenuItem value={1}>קל</MenuItem>
                 <MenuItem value={2}>בינוני</MenuItem>
-                <MenuItem value={2}>קשה</MenuItem>
+                <MenuItem value={3}>קשה</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -188,10 +154,7 @@ console.log("selectedRecipe",selectedRecipe);
             <InputLabel id="category-label">קטגוריה</InputLabel>
             <Select
               labelId="category-label"
-              label="קטגוריה"
-              name="CategoryId"
-              value={formData.Categoryid}
-              onChange={(e) => setFormData({ ...formData, Categoryid: Number(e.target.value) })}
+              {...register("Categoryid")}
             >
               {categories?.map((category) => (
                 <MenuItem key={category.Id} value={category.Id}>{category.Name}</MenuItem>
@@ -203,37 +166,34 @@ console.log("selectedRecipe",selectedRecipe);
             מרכיבים
           </Typography>
           <List sx={{ mb: 3 }}>
-            {ingridentsData.map((ingred, index) => (
-              <ListItem key={index} disableGutters sx={{ px: 0 }}>
+            {fields.map((ingred, index) => (
+              <ListItem key={ingred.id} disableGutters sx={{ px: 0 }}>
                 <ListItemText
                   primary={
                     <Box display="flex" gap={2}>
                       <TextField
                         type="text"
-                        name="Count"
                         label="כמות"
                         variant="outlined"
-                        value={ingred.Count}
-                        onChange={(e) => handleIngredientChange(index, "Count", e.target.value)}
+                        {...register(`Ingridents.${index}.Count`)}
                       />
                       <TextField
-                        name="Type"
                         label="סוג"
                         variant="outlined"
-                        value={ingred.Type}
-                        onChange={(e) => handleIngredientChange(index, "Type", e.target.value)}
-                        required
+                        {...register(`Ingridents.${index}.Type`, { required: true })}
+                        // error={!!errors.Ingridents?.[index]?.Type}
+                        error = {!!errors.Ingridents?.[index]?.Type}
+                        helperText={errors.Ingridents?.[index]?.Type ? "שדה חובה" : ""}
                       />
                       <TextField
-                        name="Name"
                         label="שם מוצר"
                         variant="outlined"
-                        value={ingred.Name}
-                        onChange={(e) => handleIngredientChange(index, "Name", e.target.value)}
-                        required
+                        {...register(`Ingridents.${index}.Name`, { required: true })}
+                        error={!!errors.Ingridents?.[index]?.Name}
+                        helperText={errors.Ingridents?.[index]?.Name ? "שדה חובה" : ""}
                       />
                       {index > 0 && (
-                        <IconButton onClick={() => removeIngredient(index)}>
+                        <IconButton onClick={() => remove(index)}>
                           <Close />
                         </IconButton>
                       )}
@@ -243,7 +203,7 @@ console.log("selectedRecipe",selectedRecipe);
               </ListItem>
             ))}
           </List>
-          <Button startIcon={<Add />} variant="outlined" size="small" onClick={addIngredient} sx={{ mb: 3 }}>
+          <Button startIcon={<Add />} variant="outlined" size="small" onClick={() => append({ Id: 0, Name: "", Count: "", Type: "" })} sx={{ mb: 3 }}>
             הוסף מרכיב
           </Button>
 
@@ -252,11 +212,10 @@ console.log("selectedRecipe",selectedRecipe);
             multiline
             rows={6}
             fullWidth
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
+            {...register("Instructions", { required: true })}
+            error={!!errors.Instructions}
+            helperText={errors.Instructions ? "שדה חובה" : ""}
             placeholder="כל הוראה בשורה חדשה..."
-            required
-            helperText="כתוב כל הוראה בשורה נפרדת"
           />
         </form>
       </DialogContent>
@@ -272,5 +231,5 @@ console.log("selectedRecipe",selectedRecipe);
         </Button>
       </DialogActions>
     </Dialog>
-  )
+  );
 }

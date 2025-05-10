@@ -129,7 +129,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
             console.log("select recipe after: ", selectedRecipe);
 
             // handleClose()
-            navigate('/edit-recipe')
+            navigate('/edit-recipe', { state: { recipe } })
           }}
         >
           <Edit fontSize="small" sx={{ mr: 1 }} /> עריכה
