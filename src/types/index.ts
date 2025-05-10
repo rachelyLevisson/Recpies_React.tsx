@@ -28,7 +28,7 @@ export interface Category {
 };
 
   export interface Recipe {
-    User: any;
+    // User: any;
     Id: number,
     Name: string,
     UserId: number,

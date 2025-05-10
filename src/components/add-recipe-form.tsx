@@ -7,36 +7,40 @@ import {
 import { Close, Add } from "@mui/icons-material"
 import { Ingridents, Recipe } from "../types"
 import { useRecipesContext } from "../Context/recipesContext"
+import { useNavigate } from "react-router-dom"
+import { useAuth } from "../hook/use-auth"
 
-interface AddRecipeFormProps {
-  recipe?: Recipe | null
-  ingredients?: Ingridents | null
-  onSubmit: (recipe: any) => void
-  onClose: () => void
-}
+// interface AddRecipeFormProps {
+//   recipe?: Recipe | null
+//   ingredients?: Ingridents | null
+//   onSubmit: (recipe: any) => void
+//   onClose: () => void
+// }
 
-export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
+// export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
+export default function AddRecipeForm() {
 
-  const isEditing = !!recipe
-
-  const { categories } = useRecipesContext();
+  const navigate = useNavigate();
+  const { categories, selectedRecipe, selectedIngredient, addRecipe, updateRecipe } = useRecipesContext();
+  const isEditing = !!selectedRecipe
+  const { user } = useAuth();
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
-    Name: recipe?.Name || "",
-    Description: recipe?.Description || "",
-    Ingridents: recipe?.Ingridents.map((ingrident: any) => { ingrident.Name, ingrident.Count, ingrident.Type }) || [],
-    Instructions: recipe?.Instructions.map((instruction: any) => instruction.Name) || [],
-    Duration: recipe?.Duration || 30,
-    Difficulty: recipe?.Difficulty || "קל",
-    Img: recipe?.Img || "/placeholder.svg?height=300&width=400",
-    Categoryid: recipe?.Categoryid.valueOf() || 0
+    Name: selectedRecipe?.Name || "",
+    Description: selectedRecipe?.Description || "",
+    Ingridents: selectedRecipe?.Ingridents.map((ingrident: any) => { ingrident.Name, ingrident.Count, ingrident.Type }) || [],
+    Instructions: selectedRecipe?.Instructions.map((instruction: any) => instruction.Name) || [],
+    Duration: selectedRecipe?.Duration || 30,
+    Difficulty: selectedRecipe?.Difficulty || 1,
+    Img: selectedRecipe?.Img || "/placeholder.svg?height=300&width=400",
+    Categoryid: selectedRecipe?.Categoryid.valueOf() || 0
   })
 
   const [ingridentsData, setIngridentsData] = useState<Ingridents[]>([{
-    Id: ingredients?.Id || 0,
-    Name: ingredients?.Name || "",
-    Count: ingredients?.Count || "",
-    Type: ingredients?.Type || ""
+    Id: selectedIngredient?.Id || 0,
+    Name: selectedIngredient?.Name || "",
+    Count: selectedIngredient?.Count || "",
+    Type: selectedIngredient?.Type || ""
   }]);
 
   const [instructions, setInstructions] = useState<string>("");
@@ -61,21 +65,33 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
     const instructionsArray = instructions.split('\n')
       .filter(line => line.trim() !== '')
       .map(line => ({ Name: line.trim() }));
+
+    const newRecpie: Recipe = {
+      Id: 0,
+      Name: formData.Name,
+      UserId: user?.Id || 0,
+      Categoryid: formData.Categoryid,
+      Img: formData.Img,
+      Duration: formData.Duration,
+      Difficulty: formData.Difficulty,
+      Description: formData.Description,
+      Ingridents: [...ingridentsData],
+      Instructions: instructionsArray.map((name: any, index: number) => ({ Id: index + 1, Name: name })),
+      createdAt: new Date(Date.now()),
+      updatedAt: new Date(Date.now())
+    }
+
     try {
       // Submit the data
-      if (isEditing && recipe) {
-        onSubmit({
-          ...recipe,
-          ...formData,
-          Ingridents: ingridentsData,
-          Instructions: instructionsArray
+      if (isEditing && selectedRecipe) {
+        updateRecipe({
+          // ...selectedRecipe,
+          ...newRecpie
         })
       } else {
-        onSubmit({
-          ...formData,
-          Ingridents: ingridentsData,
-          Instructions: instructionsArray
-        })
+        addRecipe(
+          { ...newRecpie },
+          (user?.Id || 0))
       }
     }
     catch (err: any) {
@@ -101,21 +117,21 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
 
   // Convert Instructions to string for textarea on component mount
   useEffect(() => {
-    if (recipe?.Instructions) {
-      const instructionsText = recipe.Instructions
+    if (selectedRecipe?.Instructions) {
+      const instructionsText = selectedRecipe.Instructions
         .map(instruction => instruction.Name)
         .join('\n');
       setInstructions(instructionsText);
     }
-  }, [recipe]);
+  }, [selectedRecipe]);
 
   return (
-    <Dialog open={true} onClose={onClose} maxWidth="md" fullWidth dir="rtl">
+    <Dialog open={true} maxWidth="md" fullWidth dir="rtl">
       <DialogTitle>
         {isEditing ? "עריכת מתכון" : "הוספת מתכון חדש"}
         <IconButton
           aria-label="close"
-          onClick={() => { onClose }}
+          onClick={() => { navigate(-1) }}
           sx={{
             position: "absolute",
             left: 8,
@@ -168,11 +184,11 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
                 labelId="difficulty-label"
                 value={formData.Difficulty}
                 label="רמת קושי"
-                onChange={(e) => setFormData({ ...formData, Difficulty: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, Difficulty: Number(e.target.value) })}
               >
-                <MenuItem value="קל">קל</MenuItem>
-                <MenuItem value="בינוני">בינוני</MenuItem>
-                <MenuItem value="קשה">קשה</MenuItem>
+                <MenuItem value={1} >קל</MenuItem>
+                <MenuItem value={2}>בינוני</MenuItem>
+                <MenuItem value={2}>קשה</MenuItem>
               </Select>
             </FormControl>
           </Box>
@@ -259,7 +275,7 @@ export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }
         </Typography>
       )}
       <DialogActions>
-        <Button onClick={() => { onClose }}>ביטול</Button>
+        <Button onClick={() => { navigate(-1) }}>ביטול</Button>
         <Button type="submit" form="recipe-form" variant="contained" color="primary">
           {isEditing ? "עדכן מתכון" : "הוסף מתכון"}
         </Button>

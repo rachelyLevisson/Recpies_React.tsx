@@ -5,6 +5,7 @@ import LoginForm from './components/login-form'
 import Home from './app/page'
 import AddRecipeForm from './components/add-recipe-form'
 import { RecipeDetails } from './components/recipeDetails'
+import { RecipesProvider } from './Context/recipesContext'
 
 function App() {
   const route = createBrowserRouter([
@@ -22,11 +23,12 @@ function App() {
     },
     {
       path: "/add-recipe",
-      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { }} />
+      element: <AddRecipeForm />
+      // element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { }} />
     },
     {
       path: "/edit-recipe",
-      element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { }} />
+      element: <AddRecipeForm />
     },
     // {
     //   path: "/delete-recipe",
@@ -51,9 +53,11 @@ function App() {
   return (
     <>
       {/* <ThemeProvider theme={} children={}> */}
-      <AuthProvider>
-        <RouterProvider router={route} />
-      </AuthProvider>
+      <RecipesProvider>
+        <AuthProvider>
+          <RouterProvider router={route} />
+        </AuthProvider>
+      </RecipesProvider>
       {/* </ThemeProvider> */}
     </>
   )
