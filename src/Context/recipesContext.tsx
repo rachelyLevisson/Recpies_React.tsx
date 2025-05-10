@@ -37,7 +37,6 @@ export function RecipesProvider({ children, userId }: { children: React.ReactNod
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null)
   const [selectedIngredient, setSelectedIngredient] = useState<Ingridents | null>(null)
 
-  // טעינת מתכונים
   useEffect(() => {
     const fetchRecipes = async () => {
       setLoading(true)
@@ -56,7 +55,6 @@ export function RecipesProvider({ children, userId }: { children: React.ReactNod
     fetchRecipes()
   }, [])
 
-  // טעינת קטגוריות
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -71,11 +69,9 @@ export function RecipesProvider({ children, userId }: { children: React.ReactNod
     fetchCategories()
   }, [])
 
-  // סינון מתכונים
   useEffect(() => {
     let result = [...recipes]
 
-    // סינון לפי חיפוש
     if (searchQuery) {
       result = result.filter(
         (recipe) =>
@@ -88,12 +84,10 @@ export function RecipesProvider({ children, userId }: { children: React.ReactNod
       )
     }
 
-    // סינון לפי טאב
     if (activeTab === 1 && userId) {
       result = result.filter((recipe) => recipe.UserId === userId)
     }
 
-    // סינון לפי קטגוריה
     if (selectedCategory) {
       result = result.filter((recipe) => recipe.Categoryid === selectedCategory)
     }
@@ -101,7 +95,6 @@ export function RecipesProvider({ children, userId }: { children: React.ReactNod
     setFilteredRecipes(result)
   }, [recipes, searchQuery, selectedCategory, activeTab, userId])
 
-  // פונקציות לטיפול במתכונים
   const addRecipe = async (recipeData: Recipe, userId: number) => {
     try {
       const newRecipe = {

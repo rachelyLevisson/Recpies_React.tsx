@@ -17,7 +17,6 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
 
-  // Check for saved user on mount
   useEffect(() => {
     const savedUser = localStorage.getItem("user")
     if (savedUser) {

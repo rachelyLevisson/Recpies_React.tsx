@@ -24,16 +24,11 @@ function App() {
     {
       path: "/add-recipe",
       element: <AddRecipeForm />
-      // element: <AddRecipeForm onSubmit={() => void {}} onClose={() => { }} />
     },
     {
       path: "/edit-recipe",
       element: <AddRecipeForm />
     },
-    // {
-    //   path: "/delete-recipe",
-    //   element: <Add-Recpise-Form />
-    // },
     {
       path: "/my-recipes",
       element: <Home />

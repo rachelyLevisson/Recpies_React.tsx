@@ -1,24 +1,13 @@
 import { Box, Typography, Button } from "@mui/material"
 import RecipeCard from "../components/recipe-card"
 import { useAuth } from "../hook/use-auth"
-import {  Recipe } from "../types"
 import { useRecipesContext } from "../Context/recipesContext"
 import { useNavigate } from "react-router-dom"
 
 export const RecipeList = () => {
     const { user, isAuthenticated } = useAuth()
     const { deleteRecipe ,activeTab,recipes} = useRecipesContext();
-    // filteredRecipes = recipes נראה לי שסמו במתכונים את המתכונים המפולטרים.
     const nav = useNavigate();
-
-    //All Recpies
-
-    const handleEditRecipe = (recipe: Recipe) => {
-        // setSelectedRecipe(recipe)
-        // setShowAddRecipeForm(true)
-        console.log(recipe);
-        
-    }
 
     const handleDeleteRecipe = async (recipeId: number) => {
         deleteRecipe(recipeId);
@@ -38,7 +27,6 @@ export const RecipeList = () => {
                             <RecipeCard
                                 recipe={recipe}
                                 isOwner={isAuthenticated && user?.Id === recipe.UserId}
-                                onEdit={handleEditRecipe}
                                 onDelete={handleDeleteRecipe}
                             />
                         </Box>

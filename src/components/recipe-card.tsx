@@ -13,16 +13,15 @@ import { useRecipesContext } from "../Context/recipesContext"
 interface RecipeCardProps {
   recipe: Recipe
   isOwner: boolean
-  onEdit: (recipe: Recipe) => void
   onDelete: (recipeId: number) => void
 }
 
-export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: RecipeCardProps) {
+export default function RecipeCard({ recipe, isOwner, onDelete }: RecipeCardProps) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const navigate = useNavigate();
-  const { selectRecipe, selectedRecipe } = useRecipesContext()
+  const { selectRecipe } = useRecipesContext()
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -122,13 +121,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
       >
         <MenuItem
           onClick={() => {
-            // onEdit(recipe)
-            console.log("recipe: ", recipe);
-            console.log("select recipe: ", selectedRecipe);
             selectRecipe(recipe)
-            console.log("select recipe after: ", selectedRecipe);
-
-            // handleClose()
             navigate('/edit-recipe', { state: { recipe } })
           }}
         >

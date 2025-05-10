@@ -1,10 +1,8 @@
-// services/recipe-service.ts
 import axios from "axios"
 import type { Recipe, Category } from "../types"
 
 const API_URL = "http://localhost:8080/api"
 
-// יצירת מופע axios עם הגדרות בסיסיות
 const api = axios.create({
   baseURL: API_URL,
   headers: {
@@ -12,11 +10,9 @@ const api = axios.create({
   },
 })
 
-// טיפול בשגיאות גלובלי
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // כאן אפשר להוסיף לוגיקה לטיפול בשגיאות כמו ניסיון מחדש, רענון טוקן וכו'
     const errorMessage = error.response?.data?.message || "אירעה שגיאה בתקשורת עם השרת"
     console.error("API Error:", errorMessage)
     return Promise.reject(new Error(errorMessage))
@@ -24,7 +20,6 @@ api.interceptors.response.use(
 )
 
 export const recipeService = {
-  // קבלת כל המתכונים
   getAllRecipes: async (): Promise<Recipe[]> => {
     try {
       const response = await api.get<Recipe[]>("/recipe")
@@ -34,7 +29,6 @@ export const recipeService = {
     }
   },
 
-  // קבלת מתכון לפי מזהה
   getRecipeById: async (id: number): Promise<Recipe> => {
     try {
       const response = await api.get<Recipe>(`/recipe/${id}`)
@@ -44,7 +38,6 @@ export const recipeService = {
     }
   },
 
-  // קבלת כל הקטגוריות
   getCategories: async (): Promise<Category[]> => {
     try {
       const response = await api.get<Category[]>("/category")
@@ -54,7 +47,6 @@ export const recipeService = {
     }
   },
 
-  // הוספת מתכון חדש
   addRecipe: async (recipe: Recipe): Promise<Recipe> => {
     try {
       const response = await api.post<Recipe>("/recipe", recipe)
@@ -64,7 +56,6 @@ export const recipeService = {
     }
   },
 
-  // עדכון מתכון קיים
   updateRecipe: async (recipe: Recipe): Promise<Recipe> => {
     try {
       const response = await api.post<Recipe>("/recipe/edit", recipe)
@@ -74,7 +65,6 @@ export const recipeService = {
     }
   },
 
-  // מחיקת מתכון
   deleteRecipe: async (id: number): Promise<void> => {
     try {
       await api.post(`/recipe/delete/${id}`)

@@ -8,20 +8,14 @@ import { useAuth } from "../hook/use-auth.tsx"
 import { RecipeTabs } from "../Home/RecipeTabs.tsx"
 
 export default function Home() {
-
     const {user}= useAuth();
     return (<>
-    <h1>hello</h1>
         <RecipesProvider userId={user?.Id}>
             <Container maxWidth="lg" sx={{ py: 4, minHeight: "100vh" }} dir="rtl">
                 <Headers />
                 <SearchBar />
                 <RecipeTabs/>
                 <RecipeList />
-                {/* <LoginForm onClose={function (): void {
-                    throw new Error("Function not implemented.")
-                } } /> */}
-
             </Container>
         </RecipesProvider>
         </>
