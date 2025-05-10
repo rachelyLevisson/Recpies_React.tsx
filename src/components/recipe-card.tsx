@@ -8,6 +8,7 @@ import { Edit, Delete, AccessTime, Restaurant, MoreVert } from "@mui/icons-mater
 import { Menu, MenuItem } from "@mui/material"
 import { Recipe } from "../types"
 import { useNavigate } from "react-router-dom"
+import { useRecipesContext } from "../Context/recipesContext"
 
 interface RecipeCardProps {
   recipe: Recipe
@@ -21,6 +22,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const navigate = useNavigate();
+  const { selectRecipe, selectedRecipe } = useRecipesContext()
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -100,7 +102,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
           </Box>
         </CardContent>
         <CardActions sx={{ justifyContent: "space-between", px: 2, pb: 2 }}>
-          <Button size="small" onClick={() => navigate(`/recpie/${recipe.Id}`, {state: {recipe}})}>
+          <Button size="small" onClick={() => navigate(`/recpie/${recipe.Id}`, { state: { recipe } })}>
             צפה במתכון
           </Button>
           <Typography variant="caption" color="text.secondary">
@@ -120,8 +122,13 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
       >
         <MenuItem
           onClick={() => {
-            onEdit(recipe)
-            handleClose()
+            // onEdit(recipe)
+            console.log("recipe: ", recipe);
+            console.log("select recipe: ", selectedRecipe);
+            selectRecipe(recipe)
+            console.log("select recipe after: ", selectedRecipe);
+
+            // handleClose()
             navigate('/edit-recipe')
           }}
         >
@@ -137,7 +144,7 @@ export default function RecipeCard({ recipe, isOwner, onEdit, onDelete }: Recipe
         </MenuItem>
       </Menu>
 
-      
+
       <Dialog open={showDeleteConfirm} onClose={() => setShowDeleteConfirm(false)} dir="rtl">
         <DialogTitle>מחיקת מתכון</DialogTitle>
         <DialogContent>

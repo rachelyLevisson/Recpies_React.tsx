@@ -10,19 +10,14 @@ import { useRecipesContext } from "../Context/recipesContext"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../hook/use-auth"
 
-// interface AddRecipeFormProps {
-//   recipe?: Recipe | null
-//   ingredients?: Ingridents | null
-//   onSubmit: (recipe: any) => void
-//   onClose: () => void
-// }
-
-// export default function AddRecipeForm({ recipe, ingredients, onSubmit, onClose }: AddRecipeFormProps) {
 export default function AddRecipeForm() {
 
   const navigate = useNavigate();
-  const { categories, selectedRecipe, selectedIngredient, addRecipe, updateRecipe } = useRecipesContext();
-  const isEditing = !!selectedRecipe
+  const { categories, selectedRecipe, selectRecipe,selectedIngredient, addRecipe, updateRecipe } = useRecipesContext();
+  const isEditing = !!selectRecipe
+console.log("selectRecipe",selectRecipe);
+console.log("selectedRecipe",selectedRecipe);
+
   const { user } = useAuth();
   const [error, setError] = useState("")
   const [formData, setFormData] = useState({
@@ -44,10 +39,6 @@ export default function AddRecipeForm() {
   }]);
 
   const [instructions, setInstructions] = useState<string>("");
-
-
-
-
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
