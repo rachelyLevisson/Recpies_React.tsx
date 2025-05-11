@@ -1,59 +1,31 @@
-<<<<<<< HEAD
-# React + TypeScript + Vite
+פרויקט לניהול מערכת מתכונים שבו משתמשים יכולים להוסיף, לערוך, למחוק ולצפות במתכונים. המערכת כוללת ניהול משתמשים, סינון מתכונים לפי קטגוריות, ועיצוב מודרני בעזרת MUI.
+- React עם TypeScript
+- React Router לניהול ניתובים
+- React Hook Form לניהול טפסים ולוולידציה
+- Material-UI (MUI) לעיצוב מודרני
+- Context API לניהול State
+- Axios לקריאות API
+- Node.js עבור צד שרת (לינק לפרויקט צד השרת)
+2. התקינו את התלויות:
+#### התקנת צד לקוח:
+1. שיבו את הריפו למחשב המקומי:
+3. הריצו את הפרויקט:
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+#### התקנת צד שרת:
+יש לעבור אל [פרויקט צד השרת](https://github.com/saraareact/react-recipy) ולבצע את ההוראות שם.
+- ניהול משתמשים (כניסה, הרשמה, התנתקות)
+- הוספה, עריכה ומחיקה של מתכונים
+- סינון מתכונים לפי קטגוריה, משך זמן, ורמת קושי
+- תצוגת פרטי מתכון מפורטת
+- טופס דינמי להוספת רכיבים למתכוןsrc/
+├── components/          # קומפוננטות של האפליקציה
+├── Context/             # ניהול Context API
+├── hook/                # Custom Hooks
+├── App/               # דפי האפליקציה
+├── services/            # שירותים לקריאות API
+├── App.tsx              # קומפוננטת השורש
 
-Currently, two official plugins are available:
+![image](https://github.com/user-attachments/assets/dac1e495-d393-4647-99f0-12dded9672ee)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
-=======
-# Recpies_React.tsx
-פרויקט סיכום בריאקט לניהול מערכת מתכונים
->>>>>>> 0dba6d73c23842d96a6183f6313dc1dfcf0aea98
+נשמח לקבל תרומות ופידבק! ניתן ליצור Pull Request 
